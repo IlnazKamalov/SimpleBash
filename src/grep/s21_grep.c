@@ -7,17 +7,7 @@ int main(int argc, char *argv[]) {
 }
 
 int parseFlags(int argc, char *argv[], flags *options) {
-  static struct option opt_log[] = {
-      {"ignore-case", 0, 0, 'i'},
-      {"invert-match", 0, 0, 'v'},
-      {"line-number", 0, 0, 'n'},
-      {"count", 0, 0, 'c'},
-      {"regexp", 0, 0, 'e'},
-      {"file", 0, 0, 'f'},
-      {"files-without-matches", 0, 0, 'l'},
-      {0, 0, 0, 0},
-
-  };
+  static struct option opt_log[] = {};
   int flag = 1, opt, optIndex;
 
   while ((opt = getopt_long(argc, argv, "eivclnhsfo", opt_log, &optIndex)) !=
@@ -80,11 +70,7 @@ int parseFlags(int argc, char *argv[], flags *options) {
 int parseFiles(int argc, char *argv[], flags *options, char *strSearch) {
   char *buf[100];
   int flag = 0, flagSpace = 0, i = 0;
-  for (int j = 1; j < argc; j++) {
-    if (argv[j - 1][0] == '-' && argv[j - 1][strlen(argv[j - 1]) - 1] == 'e') {
-      options->e = 1;
-    }
-  }
+
   for (int j = 1; j < argc; j++) {
     if (argv[j - 1][0] == '-' && argv[j - 1][strlen(argv[j - 1]) - 1] == 'e') {
       flag = 1;
@@ -93,7 +79,6 @@ int parseFiles(int argc, char *argv[], flags *options, char *strSearch) {
                argv[j - 1][strlen(argv[j - 1]) - 1] == 'f') {
       flag = 1;
       appendFileToPattern(strSearch, argv[j]);
-
     } else if (argv[j][0] != '-') {
       if (!flag && !options->e) {
         strSearch = argv[j];
@@ -119,7 +104,7 @@ int parseFiles(int argc, char *argv[], flags *options, char *strSearch) {
     }
   }
   if ((!flag || !flagSpace || !strSearch) && !options->s) {
-    fprintf(stderr, "file does not exist");
+    fprintf(stderr, "File does not exist");
   }
   return flag;
 }
@@ -128,6 +113,7 @@ int openFiles(char *fileName, flags *options, char *strSearch) {
   char line[MAX_LINE_LENGTH];
   int space = 0, count = 0, lastWasEpmty = 0;
   FILE *file = fopen(fileName, "r");
+
   if (file == NULL) {
     if (!options->s) {
       fprintf(stderr, "grep: %s: No such file or directory", fileName);
@@ -193,10 +179,12 @@ void appendFileToPattern(char *strSearch, char *fileName) {
   FILE *fp = fopen(fileName, "r");
   char *buff;
   long fileSize;
+
   if (!fp) {
     fprintf(stderr, "NO FILE!");
     return;
   }
+
   fseek(fp, 0, SEEK_END);
   fileSize = ftell(fp);
   rewind(fp);
@@ -204,6 +192,7 @@ void appendFileToPattern(char *strSearch, char *fileName) {
   fread(buff, fileSize, 1, fp);
   buff[fileSize] = '\0';
   char *p = buff;
+
   while (*p != '\0') {
     if (*p == '\n') {
       *p = '|';
